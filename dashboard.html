@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم - محمود خيار</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2d6a4f">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --card: #fdfaf4;
+    --green: #2d6a4f;
+    --green-light: #52b788;
+    --green-pale: #d8f3dc;
+    --accent: #40916c;
+    --blue: #2196f3;
+    --blue-pale: #e3f2fd;
+    --orange: #ff6b35;
+    --orange-pale: #fff3ee;
+    --text: #1b2f1e;
+    --text-muted: #6b8c72;
+    --border: #c8dfc9;
+    --shadow: 0 4px 24px rgba(45,106,79,0.10);
+    --nav-h: 70px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Tajawal', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    padding-bottom: calc(var(--nav-h) + 16px);
+  }
+
+  /* Top bar */
+  .topbar {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .topbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .farm-name {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .refresh-btn {
+    background: var(--green-pale);
+    border: none;
+    border-radius: 10px;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: transform 0.3s;
+  }
+  .refresh-btn:hover { transform: rotate(180deg); }
+
+  /* Page content */
+  .page { padding: 16px; }
+
+  /* Stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .stat-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 14px 10px;
+    text-align: center;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    animation: fadeIn 0.5s ease both;
+  }
+  .stat-val {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--green);
+  }
+  .stat-val.blue { color: var(--blue); }
+  .stat-val.orange { color: var(--orange); }
+  .stat-lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* Pump card */
+  .pump-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 2px solid var(--border);
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    animation: fadeIn 0.5s ease 0.1s both;
+    transition: border-color 0.3s;
+  }
+  .pump-card.active { border-color: var(--green-light); background: #f0fdf4; }
+  .pump-info { display: flex; align-items: center; gap: 12px; }
+  .pump-icon {
+    width: 44px; height: 44px;
+    background: var(--green-pale);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .pump-name { font-size: 16px; font-weight: 700; color: var(--text); }
+  .pump-status {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .pump-status .dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #ccc;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+  .pump-status.on .dot { background: #22c55e; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .pump-right { display: flex; align-items: center; gap: 10px; }
+
+  /* Toggle switch */
+  .toggle {
+    position: relative;
+    width: 52px; height: 28px;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #ccc;
+    border-radius: 28px;
+    transition: 0.3s;
+  }
+  .toggle-slider:before {
+    content: '';
+    position: absolute;
+    height: 22px; width: 22px;
+    left: 3px; top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+  .toggle input:checked + .toggle-slider { background: var(--green-light); }
+  .toggle input:checked + .toggle-slider:before { transform: translateX(24px); }
+
+  /* Schedule btn */
+  .sched-btn {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--blue-pale);
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s;
+  }
+  .sched-btn:hover { transform: scale(1.1); }
+
+  /* Section title */
+  .section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .section-title h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .zone-count {
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--green-pale);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  /* Zones grid */
+  .zones-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .zone-card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 14px;
+    border: 2px solid var(--border);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: all 0.3s;
+    animation: fadeInUp 0.5s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+  .zone-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(45,106,79,0.15); }
+  .zone-card.open { border-color: var(--green-light); }
+  .zone-card.selected { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(33,150,243,0.15); }
+
+  .zone-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .zone-name { font-size: 13px; font-weight: 700; color: var(--text); }
+  .zone-valve-status {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .valve-open { background: var(--green-pale); color: var(--green); }
+  .valve-closed { background: #f3f4f6; color: #9ca3af; }
+
+  /* Palm icons row */
+  .palms-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin-bottom: 10px;
+    direction: ltr;
+  }
+  .palm-tree {
+    font-size: 14px;
+    filter: saturate(0.8);
+  }
+  .palm-tree.needs-water { filter: hue-rotate(20deg) saturate(0.5); opacity: 0.7; }
+
+  /* Moisture bar */
+  .moisture-bar {
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .moisture-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease;
+  }
+  .moisture-fill.low { background: linear-gradient(90deg, #f97316, #fb923c); }
+  .moisture-fill.medium { background: linear-gradient(90deg, #eab308, #fbbf24); }
+  .moisture-fill.high { background: linear-gradient(90deg, #22c55e, #4ade80); }
+
+  .zone-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .moisture-status {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .moisture-pct {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: var(--nav-h);
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 20px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+    z-index: 100;
+  }
+  .nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 14px;
+    transition: background 0.2s;
+    text-decoration: none;
+  }
+  .nav-btn:hover { background: var(--green-pale); }
+  .nav-btn.active { background: var(--green-pale); }
+  .nav-icon { font-size: 22px; }
+  .nav-lbl { font-size: 11px; font-family: 'Tajawal', sans-serif; color: var(--text-muted); font-weight: 500; }
+  .nav-btn.active .nav-lbl { color: var(--green); font-weight: 700; }
+
+  /* Zone detail modal */
+  .modal-overlay {
+    position: fixed;
+    top:0;left:0;right:0;bottom:0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    display: none;
+    align-items: flex-end;
+    animation: fadeIn 0.2s;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-sheet {
+    background: var(--card);
+    border-radius: 24px 24px 0 0;
+    padding: 24px 20px 40px;
+    width: 100%;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .modal-handle {
+    width: 40px; height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+  .modal-title { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 20px; text-align: center; }
+  .modal-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-row:last-child { border-bottom: none; }
+  .modal-label { font-size: 15px; color: var(--text); font-weight: 500; }
+  .modal-value { font-size: 15px; color: var(--green); font-weight: 700; }
+  .valve-toggle-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    border: none;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: all 0.3s;
+  }
+  .valve-open-btn { background: var(--green); color: white; }
+  .valve-close-btn { background: #fee2e2; color: #dc2626; }
+
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="topbar-logo">🌱 خيار تك</div>
+  <div class="farm-name" id="farmNameTop">🌴 مزرعة الواحة للنخيل</div>
+  <button class="refresh-btn" onclick="refreshData()">🔄</button>
+</div>
+
+<div class="page">
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card" style="animation-delay:0s">
+      <div class="stat-val" id="statArea">50</div>
+      <div class="stat-lbl">المساحة acres</div>
+    </div>
+    <div class="stat-card" style="animation-delay:0.1s">
+      <div class="stat-val blue" id="statMoisture">46%</div>
+      <div class="stat-lbl">متوسط الرطوبة</div>
+    </div>
+    <div class="stat-card" style="animation-delay:0.2s">
+      <div class="stat-val orange" id="statActive">1</div>
+      <div class="stat-lbl">مناطق نشطة</div>
+    </div>
+  </div>
+
+  <!-- Pump -->
+  <div class="pump-card" id="pumpCard">
+    <div class="pump-info">
+      <div class="pump-icon">💧</div>
+      <div>
+        <div class="pump-name">المضخة الرئيسية</div>
+        <div class="pump-status" id="pumpStatus">
+          <span class="dot"></span> في وضع الاستعداد
+        </div>
+      </div>
+    </div>
+    <div class="pump-right">
+      <button class="sched-btn" onclick="openSchedule()" title="جدولة">📅</button>
+      <label class="toggle">
+        <input type="checkbox" id="pumpToggle" onchange="togglePump(this)">
+        <div class="toggle-slider"></div>
+      </label>
+    </div>
+  </div>
+
+  <!-- Zones -->
+  <div class="section-title">
+    <h2>🌾 مناطق الري</h2>
+    <span class="zone-count" id="zoneCount">6 مناطق</span>
+  </div>
+
+  <div class="zones-grid" id="zonesGrid">
+    <!-- Zones injected by JS -->
+  </div>
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+  <a class="nav-btn active" href="dashboard.html">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-lbl">لوحة التحكم</span>
+  </a>
+  <a class="nav-btn" href="reports.html">
+    <span class="nav-icon">📊</span>
+    <span class="nav-lbl">التقارير</span>
+  </a>
+  <a class="nav-btn" href="schedule.html">
+    <span class="nav-icon">📅</span>
+    <span class="nav-lbl">الجدولة</span>
+  </a>
+  <a class="nav-btn" href="advisor.html">
+    <span class="nav-icon">🤖</span>
+    <span class="nav-lbl">المرشد</span>
+  </a>
+</div>
+
+<!-- Zone detail modal -->
+<div class="modal-overlay" id="zoneModal" onclick="closeModal(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modalTitle">تفاصيل المنطقة</div>
+    <div class="modal-row">
+      <span class="modal-label">🌡️ رطوبة التربة</span>
+      <span class="modal-value" id="modalMoisture">-</span>
+    </div>
+    <div class="modal-row">
+      <span class="modal-label">💧 حالة المحبس</span>
+      <span class="modal-value" id="modalValve">-</span>
+    </div>
+    <div class="modal-row">
+      <span class="modal-label">🌴 عدد النخيل</span>
+      <span class="modal-value" id="modalTrees">-</span>
+    </div>
+    <div class="modal-row">
+      <span class="modal-label">⏱️ آخر ري</span>
+      <span class="modal-value" id="modalLastIrr">-</span>
+    </div>
+    <button class="valve-toggle-btn" id="valveActionBtn" onclick="toggleZoneValve()">فتح المحبس</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// Demo data
+const demoZones = [
+  { id:'A', name:'منطقة أ - برحي', moisture:78, valve:'مفلوق', trees:12, lastIrr:'منذ 2 ساعة', status:'ممتازة' },
+  { id:'B', name:'منطقة ب - سكّري', moisture:32, valve:'مفلوق', trees:10, lastIrr:'منذ 8 ساعات', status:'منخفضة' },
+  { id:'C', name:'منطقة ج - مجهول', moisture:28, valve:'مفتوح', trees:14, lastIrr:'الآن', status:'منخفضة' },
+  { id:'D', name:'منطقة د - خلاص', moisture:65, valve:'مفلوق', trees:11, lastIrr:'منذ 4 ساعات', status:'ممتازة' },
+  { id:'E', name:'منطقة هـ - دقلة', moisture:55, valve:'مفلوق', trees:9, lastIrr:'منذ 3 ساعات', status:'ممتازة' },
+  { id:'F', name:'منطقة و - خضري', moisture:41, valve:'مفلوق', trees:13, lastIrr:'منذ 6 ساعات', status:'متوسطة' },
+];
+
+let zones = JSON.parse(JSON.stringify(demoZones));
+let selectedZone = null;
+
+function getMoistureClass(pct) {
+  if (pct < 35) return 'low';
+  if (pct < 60) return 'medium';
+  return 'high';
+}
+function getMoistureLabel(pct) {
+  if (pct < 35) return 'منخفضة';
+  if (pct < 60) return 'متوسطة';
+  return 'ممتازة';
+}
+
+function renderZones() {
+  const grid = document.getElementById('zonesGrid');
+  const activeCount = zones.filter(z => z.valve === 'مفتوح').length;
+  document.getElementById('statActive').textContent = activeCount;
+  const avgMoisture = Math.round(zones.reduce((s,z) => s+z.moisture, 0)/zones.length);
+  document.getElementById('statMoisture').textContent = avgMoisture+'%';
+
+  grid.innerHTML = zones.map((z, i) => {
+    const cls = getMoistureClass(z.moisture);
+    const isOpen = z.valve === 'مفتوح';
+    const palmCount = Math.min(z.trees, 12);
+    const palms = Array.from({length: palmCount}, (_, pi) => {
+      const needsWater = pi >= Math.floor(palmCount * z.moisture / 100);
+      return `<span class="palm-tree${needsWater?' needs-water':''}">${isOpen?'🌴':'🌴'}</span>`;
+    }).join('');
+
+    return `<div class="zone-card${isOpen?' open':''}" style="animation-delay:${i*0.07}s" onclick="openZoneModal(${i})">
+      <div class="zone-header">
+        <div class="zone-name">${z.name}</div>
+        <span class="zone-valve-status ${isOpen?'valve-open':'valve-closed'}">${z.valve}</span>
+      </div>
+      <div class="palms-row">${palms}</div>
+      <div class="moisture-bar">
+        <div class="moisture-fill ${cls}" style="width:${z.moisture}%"></div>
+      </div>
+      <div class="zone-footer">
+        <span class="moisture-status">${getMoistureLabel(z.moisture)}</span>
+        <span class="moisture-pct">💧 ${z.moisture}%</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.openZoneModal = function(idx) {
+  selectedZone = idx;
+  const z = zones[idx];
+  document.getElementById('modalTitle').textContent = z.name;
+  document.getElementById('modalMoisture').textContent = z.moisture + '%';
+  document.getElementById('modalValve').textContent = z.valve;
+  document.getElementById('modalTrees').textContent = z.trees + ' نخلة';
+  document.getElementById('modalLastIrr').textContent = z.lastIrr;
+  const btn = document.getElementById('valveActionBtn');
+  if (z.valve === 'مفتوح') {
+    btn.textContent = '🔴 إغلاق المحبس';
+    btn.className = 'valve-toggle-btn valve-close-btn';
+  } else {
+    btn.textContent = '🟢 فتح المحبس';
+    btn.className = 'valve-toggle-btn valve-open-btn';
+  }
+  document.getElementById('zoneModal').classList.add('open');
+};
+
+window.closeModal = function(e) {
+  if (e.target === document.getElementById('zoneModal')) {
+    document.getElementById('zoneModal').classList.remove('open');
+  }
+};
+
+window.toggleZoneValve = function() {
+  if (selectedZone === null) return;
+  zones[selectedZone].valve = zones[selectedZone].valve === 'مفتوح' ? 'مفلوق' : 'مفتوح';
+  renderZones();
+  document.getElementById('zoneModal').classList.remove('open');
+  // Firebase: update(ref(db, `zones/${zones[selectedZone].id}`), {valve: zones[selectedZone].valve});
+};
+
+window.togglePump = function(el) {
+  const card = document.getElementById('pumpCard');
+  const status = document.getElementById('pumpStatus');
+  if (el.checked) {
+    card.classList.add('active');
+    status.className = 'pump-status on';
+    status.innerHTML = '<span class="dot"></span> مباشر – يعمل الآن';
+  } else {
+    card.classList.remove('active');
+    status.className = 'pump-status';
+    status.innerHTML = '<span class="dot"></span> في وضع الاستعداد';
+  }
+};
+
+window.refreshData = function() {
+  // Simulate data refresh
+  zones = zones.map(z => ({
+    ...z,
+    moisture: Math.max(10, Math.min(95, z.moisture + Math.floor(Math.random()*10)-5))
+  }));
+  renderZones();
+};
+
+window.openSchedule = function() {
+  window.location.href = 'schedule.html';
+};
+
+// Load farm name
+const farm = JSON.parse(localStorage.getItem('khayar_farm') || '{}');
+if (farm.farmName) {
+  document.getElementById('farmNameTop').textContent = '🌴 ' + farm.farmName;
+  document.title = farm.farmName + ' - محمود خيار';
+}
+
+renderZones();
+</script>
+</body>
+</html>

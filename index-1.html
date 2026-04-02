@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>محمود خيار - للري الحديث</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2d6a4f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --card: #fdfaf4;
+    --green: #2d6a4f;
+    --green-light: #52b788;
+    --green-pale: #d8f3dc;
+    --accent: #40916c;
+    --text: #1b2f1e;
+    --text-muted: #6b8c72;
+    --border: #c8dfc9;
+    --shadow: 0 4px 24px rgba(45,106,79,0.12);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Tajawal', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Animated palm background */
+  .bg-palms {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .palm {
+    position: absolute;
+    font-size: 28px;
+    opacity: 0.18;
+    animation: sway 4s ease-in-out infinite;
+  }
+  .palm:nth-child(odd) { animation-direction: reverse; }
+  @keyframes sway {
+    0%,100% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg); }
+  }
+
+  /* Floating water drops */
+  .drop {
+    position: fixed;
+    width: 6px; height: 10px;
+    background: linear-gradient(180deg, #52b788, #2d6a4f);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    opacity: 0;
+    animation: fall linear infinite;
+  }
+  @keyframes fall {
+    0% { opacity: 0; transform: translateY(-20px); }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.3; }
+    100% { opacity: 0; transform: translateY(100vh); }
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    animation: fadeInDown 0.8s ease;
+  }
+  .logo-wrap {
+    width: 80px; height: 80px;
+    background: var(--card);
+    border-radius: 24px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 16px;
+    box-shadow: var(--shadow);
+    border: 2px solid var(--border);
+  }
+  .title {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-weight: 400;
+  }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 28px 24px;
+    width: 100%;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    animation: fadeInUp 0.8s ease 0.2s both;
+  }
+  .card-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .card-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  /* Input */
+  .input-wrap {
+    position: relative;
+    margin-bottom: 16px;
+  }
+  .mac-input {
+    width: 100%;
+    padding: 14px 48px 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    font-family: 'Courier New', monospace;
+    font-size: 15px;
+    letter-spacing: 1px;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    text-align: center;
+    direction: ltr;
+  }
+  .mac-input:focus {
+    border-color: var(--green-light);
+    box-shadow: 0 0 0 4px rgba(82,183,136,0.15);
+  }
+  .copy-btn {
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 18px;
+    padding: 4px;
+    transition: color 0.2s;
+  }
+  .copy-btn:hover { color: var(--green); }
+
+  /* Connect button */
+  .connect-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--green), var(--accent));
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 16px rgba(45,106,79,0.35);
+  }
+  .connect-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(45,106,79,0.45);
+  }
+  .connect-btn:active { transform: translateY(0); }
+  .connect-btn.loading {
+    opacity: 0.8;
+    pointer-events: none;
+  }
+  .wifi-icon { font-size: 20px; }
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: none;
+  }
+  .connect-btn.loading .spinner { display: block; }
+  .connect-btn.loading .wifi-icon { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Status */
+  .status-msg {
+    text-align: center;
+    font-size: 13px;
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 12px;
+    display: none;
+  }
+  .status-msg.error { background: #ffe8e8; color: #c0392b; display: block; }
+  .status-msg.success { background: var(--green-pale); color: var(--green); display: block; }
+
+  /* Tags */
+  .tags {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeIn 0.8s ease 0.5s both;
+  }
+  .tag {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Background palms -->
+<div class="bg-palms" id="bgPalms"></div>
+
+<div class="container">
+  <div class="header">
+    <div class="logo-wrap">🌱</div>
+    <h1 class="title">محمود خيار</h1>
+    <p class="subtitle">للري الحديث – إدارة مزارع النخيل</p>
+  </div>
+
+  <div class="card">
+    <h2 class="card-title">الاتصال بوحدة التحكم</h2>
+    <p class="card-sub">أدخل الرقم التسلسلي للبوابة (MAC Address)</p>
+
+    <div class="input-wrap">
+      <input
+        type="text"
+        class="mac-input"
+        id="macInput"
+        placeholder="AA:BB:CC:DD:EE:FF"
+        maxlength="17"
+      >
+      <button class="copy-btn" onclick="pasteMAC()" title="لصق">📋</button>
+    </div>
+
+    <button class="connect-btn" id="connectBtn" onclick="connect()">
+      <span class="wifi-icon">📡</span>
+      <div class="spinner"></div>
+      <span id="btnText">اتصال</span>
+    </button>
+
+    <div class="status-msg" id="statusMsg"></div>
+  </div>
+
+  <div class="tags">
+    <div class="tag">📡 بوابة LoRa</div>
+    <div class="tag">📶 إنترنت الأشياء</div>
+    <div class="tag">🔒 اتصال آمن</div>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+window._db = db;
+window._ref = ref;
+window._set = set;
+window._get = get;
+
+// Generate background palms & drops
+const bgPalms = document.getElementById('bgPalms');
+const palmEmojis = ['🌴','🌿','🌴','🌾'];
+const positions = [
+  {top:'5%',left:'3%'},{top:'5%',left:'18%'},{top:'5%',left:'33%'},
+  {top:'5%',left:'50%'},{top:'5%',left:'65%'},{top:'5%',left:'80%'},
+  {top:'5%',left:'93%'},
+  {bottom:'5%',left:'3%'},{bottom:'5%',left:'18%'},{bottom:'5%',left:'33%'},
+  {bottom:'5%',left:'50%'},{bottom:'5%',left:'65%'},{bottom:'5%',left:'80%'},
+  {bottom:'5%',left:'93%'}
+];
+positions.forEach((pos, i) => {
+  const el = document.createElement('div');
+  el.className = 'palm';
+  el.textContent = palmEmojis[i % palmEmojis.length];
+  Object.assign(el.style, pos);
+  el.style.animationDelay = (i * 0.3) + 's';
+  bgPalms.appendChild(el);
+});
+
+for (let i = 0; i < 8; i++) {
+  const drop = document.createElement('div');
+  drop.className = 'drop';
+  drop.style.left = (Math.random() * 100) + '%';
+  drop.style.animationDuration = (3 + Math.random() * 5) + 's';
+  drop.style.animationDelay = (Math.random() * 5) + 's';
+  document.body.appendChild(drop);
+}
+
+window.pasteMAC = async function() {
+  try {
+    const text = await navigator.clipboard.readText();
+    document.getElementById('macInput').value = text;
+  } catch {}
+};
+
+window.connect = async function() {
+  const mac = document.getElementById('macInput').value.trim().toUpperCase();
+  const btn = document.getElementById('connectBtn');
+  const status = document.getElementById('statusMsg');
+  const macRegex = /^([0-9A-F]{2}:){5}[0-9A-F]{2}$/;
+
+  status.className = 'status-msg';
+  status.style.display = 'none';
+
+  if (!macRegex.test(mac)) {
+    status.className = 'status-msg error';
+    status.textContent = '⚠️ صيغة MAC Address غير صحيحة. مثال: AA:BB:CC:DD:EE:FF';
+    return;
+  }
+
+  btn.classList.add('loading');
+  document.getElementById('btnText').textContent = 'جاري الاتصال...';
+
+  try {
+    const gatewayRef = window._ref(window._db, `gateways/${mac.replace(/:/g,'')}`);
+    const snapshot = await window._get(gatewayRef);
+
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      localStorage.setItem('khayar_mac', mac);
+      localStorage.setItem('khayar_farm', JSON.stringify(data));
+      status.className = 'status-msg success';
+      status.textContent = `✅ تم الاتصال بـ ${data.farmName || 'المزرعة'} بنجاح!`;
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+    } else {
+      // Demo mode
+      localStorage.setItem('khayar_mac', mac);
+      localStorage.setItem('khayar_farm', JSON.stringify({
+        farmName: 'مزرعة الواحة للنخيل',
+        area: 50,
+        zones: 6
+      }));
+      status.className = 'status-msg success';
+      status.textContent = '✅ وضع التجريبي – جاري الدخول...';
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+    }
+  } catch (e) {
+    status.className = 'status-msg error';
+    status.textContent = '❌ فشل الاتصال. تحقق من الإنترنت وأعد المحاولة.';
+  }
+
+  btn.classList.remove('loading');
+  document.getElementById('btnText').textContent = 'اتصال';
+};
+
+// Format MAC input
+document.getElementById('macInput').addEventListener('input', function(e) {
+  let val = e.target.value.replace(/[^0-9A-Fa-f]/g,'');
+  let formatted = val.match(/.{1,2}/g)?.join(':') || val;
+  if (formatted.length > 17) formatted = formatted.substring(0, 17);
+  e.target.value = formatted.toUpperCase();
+});
+</script>
+</body>
+</html>

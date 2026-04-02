@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الجدولة - محمود خيار</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2d6a4f">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0e8; --card: #fdfaf4; --green: #2d6a4f;
+    --green-light: #52b788; --green-pale: #d8f3dc; --accent: #40916c;
+    --blue: #2196f3; --blue-pale: #e3f2fd; --text: #1b2f1e;
+    --text-muted: #6b8c72; --border: #c8dfc9;
+    --shadow: 0 4px 24px rgba(45,106,79,0.10); --nav-h: 70px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Tajawal', sans-serif; background: var(--bg); min-height: 100vh; padding-bottom: calc(var(--nav-h) + 16px); }
+  .topbar { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px 20px; font-size: 18px; font-weight: 800; color: var(--text); text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .page { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* Add schedule btn */
+  .add-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--green), var(--accent));
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 16px rgba(45,106,79,0.35);
+    transition: all 0.3s;
+  }
+  .add-btn:hover { transform: translateY(-2px); }
+
+  /* Section title */
+  .section-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: -4px; }
+
+  /* Schedule card */
+  .sched-card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 16px;
+    border: 2px solid var(--border);
+    box-shadow: var(--shadow);
+    animation: fadeInUp 0.5s ease both;
+    transition: all 0.3s;
+  }
+  .sched-card.active { border-color: var(--green-light); background: #f0fdf4; }
+  .sched-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .sched-zone { font-size: 15px; font-weight: 700; color: var(--text); }
+  .sched-badge {
+    font-size: 11px; padding: 3px 10px; border-radius: 10px; font-weight: 600;
+  }
+  .badge-daily { background: var(--green-pale); color: var(--green); }
+  .badge-custom { background: var(--blue-pale); color: var(--blue); }
+  .badge-once { background: #fef3c7; color: #d97706; }
+
+  .sched-details { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .sched-detail { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--text-muted); }
+
+  .sched-footer { display: flex; justify-content: space-between; align-items: center; }
+  .toggle { position: relative; width: 48px; height: 26px; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; cursor: pointer; top:0;left:0;right:0;bottom:0; background:#ccc; border-radius:26px; transition:0.3s; }
+  .toggle-slider:before { content:''; position:absolute; height:20px; width:20px; left:3px; top:3px; background:white; border-radius:50%; transition:0.3s; box-shadow:0 2px 6px rgba(0,0,0,0.2); }
+  .toggle input:checked + .toggle-slider { background: var(--green-light); }
+  .toggle input:checked + .toggle-slider:before { transform: translateX(22px); }
+  .del-btn { background: #fee2e2; border: none; border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+  .del-btn:hover { background: #fecaca; }
+
+  /* Modal */
+  .modal-overlay { position: fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.5); z-index:200; display:none; align-items:flex-end; }
+  .modal-overlay.open { display: flex; }
+  .modal-sheet { background:var(--card); border-radius:24px 24px 0 0; padding:24px 20px 40px; width:100%; animation: slideUp 0.3s ease; }
+  @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+  .modal-handle { width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px; }
+  .modal-title { font-size:18px;font-weight:800;color:var(--text);margin-bottom:20px;text-align:center; }
+
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; display: block; }
+  .form-select, .form-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .form-select:focus, .form-input:focus { border-color: var(--green-light); }
+  .time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .save-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--green), var(--accent));
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    box-shadow: 0 4px 16px rgba(45,106,79,0.35);
+  }
+
+  .bottom-nav { position:fixed; bottom:0;left:0;right:0; height:var(--nav-h); background:var(--card); border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-around; padding:0 20px; box-shadow:0 -4px 20px rgba(0,0,0,0.08); z-index:100; }
+  .nav-btn { display:flex;flex-direction:column;align-items:center;gap:4px; background:none;border:none;cursor:pointer; padding:8px 16px;border-radius:14px; transition:background 0.2s;text-decoration:none; }
+  .nav-btn:hover,.nav-btn.active { background:var(--green-pale); }
+  .nav-icon { font-size:22px; }
+  .nav-lbl { font-size:11px;font-family:'Tajawal',sans-serif;color:var(--text-muted);font-weight:500; }
+  .nav-btn.active .nav-lbl { color:var(--green);font-weight:700; }
+  @keyframes fadeInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+<div class="topbar">📅 جدولة الري</div>
+<div class="page">
+
+  <button class="add-btn" onclick="openModal()">➕ إضافة جدول ري جديد</button>
+  <div class="section-title">🗓️ الجداول النشطة</div>
+  <div id="schedList"></div>
+
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+  <a class="nav-btn" href="dashboard.html"><span class="nav-icon">🏠</span><span class="nav-lbl">لوحة التحكم</span></a>
+  <a class="nav-btn" href="reports.html"><span class="nav-icon">📊</span><span class="nav-lbl">التقارير</span></a>
+  <a class="nav-btn active" href="schedule.html"><span class="nav-icon">📅</span><span class="nav-lbl">الجدولة</span></a>
+  <a class="nav-btn" href="advisor.html"><span class="nav-icon">🤖</span><span class="nav-lbl">المرشد</span></a>
+</div>
+
+<!-- Add modal -->
+<div class="modal-overlay" id="addModal" onclick="closeModal(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">➕ جدول ري جديد</div>
+
+    <div class="form-group">
+      <label class="form-label">المنطقة</label>
+      <select class="form-select" id="selZone">
+        <option>منطقة أ - برحي</option>
+        <option>منطقة ب - سكّري</option>
+        <option>منطقة ج - مجهول</option>
+        <option>منطقة د - خلاص</option>
+        <option>منطقة هـ - دقلة</option>
+        <option>منطقة و - خضري</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">نوع الجدول</label>
+      <select class="form-select" id="selType">
+        <option value="daily">يومي</option>
+        <option value="custom">مخصص</option>
+        <option value="once">مرة واحدة</option>
+      </select>
+    </div>
+
+    <div class="form-group time-row">
+      <div>
+        <label class="form-label">وقت البدء</label>
+        <input type="time" class="form-input" id="startTime" value="06:00">
+      </div>
+      <div>
+        <label class="form-label">المدة (دقيقة)</label>
+        <input type="number" class="form-input" id="duration" value="45" min="5" max="180">
+      </div>
+    </div>
+
+    <button class="save-btn" onclick="saveSchedule()">💾 حفظ الجدول</button>
+  </div>
+</div>
+
+<script>
+let schedules = [
+  {id:1, zone:'منطقة أ - برحي', type:'daily', time:'06:00', duration:45, active:true},
+  {id:2, zone:'منطقة ج - مجهول', type:'daily', time:'18:00', duration:30, active:true},
+  {id:3, zone:'منطقة ب - سكّري', type:'custom', time:'07:30', duration:60, active:false},
+];
+
+const typeMap = {daily:'badge-daily', custom:'badge-custom', once:'badge-once'};
+const typeLabel = {daily:'يومي', custom:'مخصص', once:'مرة واحدة'};
+
+function renderSchedules() {
+  const list = document.getElementById('schedList');
+  if (!schedules.length) {
+    list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:40px 0;font-size:14px;">لا توجد جداول بعد. أضف جدول ري!</div>';
+    return;
+  }
+  list.innerHTML = schedules.map((s,i) => `
+    <div class="sched-card${s.active?' active':''}" style="animation-delay:${i*0.08}s;margin-bottom:12px">
+      <div class="sched-header">
+        <div class="sched-zone">${s.zone}</div>
+        <span class="sched-badge ${typeMap[s.type]}">${typeLabel[s.type]}</span>
+      </div>
+      <div class="sched-details">
+        <div class="sched-detail">⏰ ${s.time}</div>
+        <div class="sched-detail">⏱️ ${s.duration} دقيقة</div>
+      </div>
+      <div class="sched-footer">
+        <label class="toggle">
+          <input type="checkbox" ${s.active?'checked':''} onchange="toggleSched(${s.id}, this)">
+          <div class="toggle-slider"></div>
+        </label>
+        <button class="del-btn" onclick="deleteSched(${s.id})">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+window.toggleSched = function(id, el) {
+  const s = schedules.find(s => s.id === id);
+  if (s) { s.active = el.checked; renderSchedules(); }
+};
+
+window.deleteSched = function(id) {
+  schedules = schedules.filter(s => s.id !== id);
+  renderSchedules();
+};
+
+window.openModal = function() {
+  document.getElementById('addModal').classList.add('open');
+};
+
+window.closeModal = function(e) {
+  if (e.target === document.getElementById('addModal')) {
+    document.getElementById('addModal').classList.remove('open');
+  }
+};
+
+window.saveSchedule = function() {
+  const newSched = {
+    id: Date.now(),
+    zone: document.getElementById('selZone').value,
+    type: document.getElementById('selType').value,
+    time: document.getElementById('startTime').value,
+    duration: parseInt(document.getElementById('duration').value),
+    active: true
+  };
+  schedules.unshift(newSched);
+  renderSchedules();
+  document.getElementById('addModal').classList.remove('open');
+};
+
+renderSchedules();
+</script>
+</body>
+</html>

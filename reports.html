@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>التقارير - محمود خيار</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2d6a4f">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --card: #fdfaf4;
+    --green: #2d6a4f;
+    --green-light: #52b788;
+    --green-pale: #d8f3dc;
+    --accent: #40916c;
+    --blue: #2196f3;
+    --blue-pale: #e3f2fd;
+    --orange: #ff6b35;
+    --text: #1b2f1e;
+    --text-muted: #6b8c72;
+    --border: #c8dfc9;
+    --shadow: 0 4px 24px rgba(45,106,79,0.10);
+    --nav-h: 70px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Tajawal', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    padding-bottom: calc(var(--nav-h) + 16px);
+  }
+  .topbar {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .page { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* Period selector */
+  .period-row {
+    display: flex;
+    gap: 8px;
+  }
+  .period-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    background: var(--card);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .period-btn.active {
+    background: var(--green);
+    color: white;
+    border-color: var(--green);
+  }
+
+  /* Summary cards */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .summary-card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    animation: fadeInUp 0.5s ease both;
+  }
+  .summary-icon { font-size: 24px; margin-bottom: 8px; }
+  .summary-val {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--green);
+  }
+  .summary-val.blue { color: var(--blue); }
+  .summary-val.orange { color: var(--orange); }
+  .summary-lbl { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* Chart card */
+  .chart-card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 18px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .chart-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+  .bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 100px;
+  }
+  .bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+  .bar-fill {
+    width: 100%;
+    border-radius: 6px 6px 0 0;
+    background: linear-gradient(180deg, var(--green-light), var(--green));
+    transition: height 1s ease;
+    min-height: 4px;
+  }
+  .bar-fill.blue { background: linear-gradient(180deg, #64b5f6, #2196f3); }
+  .bar-lbl { font-size: 10px; color: var(--text-muted); }
+
+  /* Zone moisture table */
+  .zone-table-card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 18px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .zone-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+  .zone-row:last-child { border-bottom: none; }
+  .zone-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .zone-row-name { flex: 1; font-size: 14px; color: var(--text); font-weight: 500; }
+  .zone-bar-wrap { width: 80px; }
+  .zone-mini-bar {
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .zone-mini-fill {
+    height: 100%;
+    border-radius: 3px;
+  }
+  .zone-row-pct { font-size: 13px; font-weight: 700; color: var(--text); min-width: 36px; text-align: left; }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: var(--nav-h);
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 20px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+    z-index: 100;
+  }
+  .nav-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    background: none; border: none; cursor: pointer;
+    padding: 8px 16px; border-radius: 14px;
+    transition: background 0.2s; text-decoration: none;
+  }
+  .nav-btn:hover, .nav-btn.active { background: var(--green-pale); }
+  .nav-icon { font-size: 22px; }
+  .nav-lbl { font-size: 11px; font-family: 'Tajawal', sans-serif; color: var(--text-muted); font-weight: 500; }
+  .nav-btn.active .nav-lbl { color: var(--green); font-weight: 700; }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div class="topbar">📊 تقارير المزرعة</div>
+<div class="page">
+
+  <!-- Period -->
+  <div class="period-row">
+    <button class="period-btn active" onclick="setPeriod(this,'اليوم')">اليوم</button>
+    <button class="period-btn" onclick="setPeriod(this,'الأسبوع')">الأسبوع</button>
+    <button class="period-btn" onclick="setPeriod(this,'الشهر')">الشهر</button>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-grid">
+    <div class="summary-card" style="animation-delay:0s">
+      <div class="summary-icon">💧</div>
+      <div class="summary-val" id="waterUsed">3,240</div>
+      <div class="summary-lbl">لتر مياه مستهلكة</div>
+    </div>
+    <div class="summary-card" style="animation-delay:0.1s">
+      <div class="summary-icon">⏱️</div>
+      <div class="summary-val blue" id="irrigHours">7.5</div>
+      <div class="summary-lbl">ساعة ري</div>
+    </div>
+    <div class="summary-card" style="animation-delay:0.2s">
+      <div class="summary-icon">🌡️</div>
+      <div class="summary-val orange" id="avgMoisture">46%</div>
+      <div class="summary-lbl">متوسط الرطوبة</div>
+    </div>
+    <div class="summary-card" style="animation-delay:0.3s">
+      <div class="summary-icon">⚡</div>
+      <div class="summary-val" id="pumpRuns">12</div>
+      <div class="summary-lbl">دورة تشغيل مضخة</div>
+    </div>
+  </div>
+
+  <!-- Water consumption chart -->
+  <div class="chart-card">
+    <div class="chart-title">💧 استهلاك المياه (آخر 7 أيام)</div>
+    <div class="bar-chart" id="waterChart">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+
+  <!-- Moisture chart -->
+  <div class="chart-card">
+    <div class="chart-title">🌡️ رطوبة التربة (آخر 7 أيام)</div>
+    <div class="bar-chart" id="moistureChart"></div>
+  </div>
+
+  <!-- Zones moisture -->
+  <div class="zone-table-card">
+    <div class="chart-title">🌾 رطوبة مناطق الري</div>
+    <div id="zoneTable"></div>
+  </div>
+
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+  <a class="nav-btn" href="dashboard.html"><span class="nav-icon">🏠</span><span class="nav-lbl">لوحة التحكم</span></a>
+  <a class="nav-btn active" href="reports.html"><span class="nav-icon">📊</span><span class="nav-lbl">التقارير</span></a>
+  <a class="nav-btn" href="schedule.html"><span class="nav-icon">📅</span><span class="nav-lbl">الجدولة</span></a>
+  <a class="nav-btn" href="advisor.html"><span class="nav-icon">🤖</span><span class="nav-lbl">المرشد</span></a>
+</div>
+
+<script>
+const waterData = [2800,3100,2600,3400,2900,3200,3240];
+const moistureData = [42,45,43,48,44,47,46];
+const days = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','اليوم'];
+const zones = [
+  {name:'منطقة أ - برحي', moisture:78, color:'#22c55e'},
+  {name:'منطقة ب - سكّري', moisture:32, color:'#f97316'},
+  {name:'منطقة ج - مجهول', moisture:28, color:'#ef4444'},
+  {name:'منطقة د - خلاص', moisture:65, color:'#3b82f6'},
+  {name:'منطقة هـ - دقلة', moisture:55, color:'#8b5cf6'},
+  {name:'منطقة و - خضري', moisture:41, color:'#eab308'},
+];
+
+function renderWaterChart() {
+  const max = Math.max(...waterData);
+  document.getElementById('waterChart').innerHTML = waterData.map((v,i) => `
+    <div class="bar-col">
+      <div class="bar-fill" style="height:${(v/max)*85}%"></div>
+      <div class="bar-lbl">${days[i].substring(0,3)}</div>
+    </div>
+  `).join('');
+}
+
+function renderMoistureChart() {
+  const max = 100;
+  document.getElementById('moistureChart').innerHTML = moistureData.map((v,i) => `
+    <div class="bar-col">
+      <div class="bar-fill blue" style="height:${(v/max)*85}%"></div>
+      <div class="bar-lbl">${days[i].substring(0,3)}</div>
+    </div>
+  `).join('');
+}
+
+function renderZoneTable() {
+  document.getElementById('zoneTable').innerHTML = zones.map(z => {
+    const cls = z.moisture < 35 ? '#ef4444' : z.moisture < 60 ? '#eab308' : '#22c55e';
+    return `<div class="zone-row">
+      <div class="zone-dot" style="background:${z.color}"></div>
+      <div class="zone-row-name">${z.name}</div>
+      <div class="zone-bar-wrap">
+        <div class="zone-mini-bar">
+          <div class="zone-mini-fill" style="width:${z.moisture}%;background:${cls}"></div>
+        </div>
+      </div>
+      <div class="zone-row-pct">${z.moisture}%</div>
+    </div>`;
+  }).join('');
+}
+
+window.setPeriod = function(btn, period) {
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Update demo data based on period
+  if (period === 'الأسبوع') {
+    document.getElementById('waterUsed').textContent = '22,450';
+    document.getElementById('irrigHours').textContent = '52';
+    document.getElementById('avgMoisture').textContent = '44%';
+    document.getElementById('pumpRuns').textContent = '84';
+  } else if (period === 'الشهر') {
+    document.getElementById('waterUsed').textContent = '94,200';
+    document.getElementById('irrigHours').textContent = '218';
+    document.getElementById('avgMoisture').textContent = '45%';
+    document.getElementById('pumpRuns').textContent = '360';
+  } else {
+    document.getElementById('waterUsed').textContent = '3,240';
+    document.getElementById('irrigHours').textContent = '7.5';
+    document.getElementById('avgMoisture').textContent = '46%';
+    document.getElementById('pumpRuns').textContent = '12';
+  }
+};
+
+renderWaterChart();
+renderMoistureChart();
+renderZoneTable();
+</script>
+</body>
+</html>
